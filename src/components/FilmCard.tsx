@@ -9,7 +9,7 @@ export interface Film {
 
 export interface FilmCardProps {
   film: Film;
-  onToggleWatched: (title: string) => void;
+  onToggleWatched: (id: number) => void;
 }
 
 export default function FilmCard({ film, onToggleWatched }: FilmCardProps) {
@@ -24,7 +24,7 @@ export default function FilmCard({ film, onToggleWatched }: FilmCardProps) {
       </p>
       <p>{isRatingValid ? `Rating: ${rating}/10` : 'Neplatné hodnocení'}</p>
       <p>{watched ? 'Zhlédnuto' : 'Nezhlédnuto'}</p>
-      <button type="button" onClick={() => onToggleWatched(title)}>
+      <button type="button" onClick={() => onToggleWatched(film.id)}>
         Změnit stav zhlédnutí
       </button>
     </div>
