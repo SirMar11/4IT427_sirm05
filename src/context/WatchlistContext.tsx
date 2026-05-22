@@ -1,46 +1,74 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type { Film } from '../types/film.types';
 
 interface WatchlistContextValue {
   films: Film[];
-  addFilm: (film: Film) => void;
-  removeFilm: (id: number) => void;
-  toggleWatched: (id: number) => void;
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => void;
+  addFilm: (film: Omit<Film, 'id'>) => void;
+  removeFilm: (id: string) => void;
+  toggleWatched: (id: string) => void;
   markAllAsWatched: () => void;
 }
 
 const WatchlistContext = createContext<WatchlistContextValue | null>(null);
 
-const initialFilms: Film[] = [
-  { id: 1, title: 'Inception', year: 2010, genre: 'Sci-Fi', rating: 9, watched: false },
-  { id: 2, title: 'The Matrix', year: 1999, genre: 'Action', rating: 10, watched: false },
-  { id: 3, title: 'Spirited Away', year: 2001, genre: 'Animation', rating: 8, watched: false },
-];
-
 export function WatchlistProvider({ children }: { children: React.ReactNode }) {
-  const [films, setFilms] = useState<Film[]>(initialFilms);
+  const [films, setFilms] = useState<Film[]>([]);
+  const seededRef = useRef(false);
 
-  const addFilm = (film: Film) => {
-    setFilms((prev) => [...prev, film]);
+  const {
+    data: serverFilms,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ['films'],
+    queryFn: async () => {
+      const res = await fetch('/films.json');
+      if (!res.ok) throw new Error('Nepodařilo se načíst filmy');
+      return res.json() as Promise<Film[]>;
+    },
+  });
+
+  useEffect(() => {
+    if (serverFilms && !seededRef.current) {
+      setFilms(serverFilms);
+      seededRef.current = true;
+    }
+  }, [serverFilms]);
+
+  const addFilm = (filmData: Omit<Film, 'id'>) => {
+    const newFilm: Film = { ...filmData, id: Date.now().toString() };
+    setFilms((prev) => [...prev, newFilm]);
   };
 
-  const removeFilm = (id: number) => {
-    setFilms((prev) => prev.filter((film) => film.id !== id));
-  };
+  const removeFilm = (id: string) => setFilms((prev) => prev.filter((f) => f.id !== id));
 
-  const toggleWatched = (id: number) => {
-    setFilms((prev) =>
-      prev.map((film) => (film.id === id ? { ...film, watched: !film.watched } : film))
-    );
-  };
+  const toggleWatched = (id: string) =>
+    setFilms((prev) => prev.map((f) => (f.id === id ? { ...f, watched: !f.watched } : f)));
 
-  const markAllAsWatched = () => {
-    setFilms((prev) => prev.map((film) => ({ ...film, watched: true })));
+  const markAllAsWatched = () => setFilms((prev) => prev.map((f) => ({ ...f, watched: true })));
+
+  const handleRefetch = () => {
+    seededRef.current = false;
+    void refetch();
   };
 
   return (
     <WatchlistContext.Provider
-      value={{ films, addFilm, removeFilm, toggleWatched, markAllAsWatched }}
+      value={{
+        films,
+        isLoading,
+        isError,
+        refetch: handleRefetch,
+        addFilm,
+        removeFilm,
+        toggleWatched,
+        markAllAsWatched,
+      }}
     >
       {children}
     </WatchlistContext.Provider>
@@ -49,8 +77,6 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
 
 export function useWatchlist() {
   const context = useContext(WatchlistContext);
-  if (!context) {
-    throw new Error('useWatchlist must be used within a WatchlistProvider');
-  }
+  if (!context) throw new Error('useWatchlist musí být použit uvnitř WatchlistProvider');
   return context;
 }

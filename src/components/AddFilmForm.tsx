@@ -17,7 +17,6 @@ export default function AddFilmForm({ onSuccess }: AddFilmFormProps) {
     e.preventDefault();
 
     addFilm({
-      id: Date.now(),
       title,
       year: Number(year),
       genre,
@@ -29,7 +28,6 @@ export default function AddFilmForm({ onSuccess }: AddFilmFormProps) {
     setYear('');
     setGenre('');
     setRating('');
-
     onSuccess?.();
   };
 

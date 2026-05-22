@@ -2,8 +2,8 @@ import type { Film } from '../types/film.types';
 
 interface FilmCardProps {
   film: Film;
-  onToggleWatched: (id: number) => void;
-  onRemove: (id: number) => void;
+  onToggleWatched: (id: string) => void;
+  onRemove: (id: string) => void;
 }
 
 export default function FilmCard({ film, onToggleWatched, onRemove }: FilmCardProps) {
