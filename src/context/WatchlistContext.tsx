@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { Film } from '../types/film.types';
+import fetchFilms from '../api/films';
 
 interface WatchlistContextValue {
   films: Film[];
@@ -26,11 +27,7 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
     refetch,
   } = useQuery({
     queryKey: ['films'],
-    queryFn: async () => {
-      const res = await fetch('/films.json');
-      if (!res.ok) throw new Error('Nepodařilo se načíst filmy');
-      return res.json() as Promise<Film[]>;
-    },
+    queryFn: fetchFilms,
   });
 
   useEffect(() => {
