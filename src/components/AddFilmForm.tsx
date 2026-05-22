@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { useWatchlist } from '../context/WatchlistContext.tsx';
 
-export default function AddFilmForm() {
+interface AddFilmFormProps {
+  onSuccess?: () => void;
+}
+
+export default function AddFilmForm({ onSuccess }: AddFilmFormProps) {
   const { addFilm } = useWatchlist();
 
   const [title, setTitle] = useState('');
@@ -25,19 +29,18 @@ export default function AddFilmForm() {
     setYear('');
     setGenre('');
     setRating('');
+
+    onSuccess?.();
   };
 
   return (
     <div className="form-panel">
       <form onSubmit={handleSubmit}>
         <div className="form-grid">
-          {/*
-           * Každý input musí mít <label> s htmlFor shodným s id inputu.
-           * WCAG 1.3.1 a 3.3.2: placeholder sám o sobě nestačí —
-           * zmizí při psaní a screen readery ho čtou nespolehlivě.
-           */}
           <div className="form-field">
-            <label className="form-label" htmlFor="film-title">Název</label>
+            <label className="form-label" htmlFor="film-title">
+              Název
+            </label>
             <input
               id="film-title"
               className="input"
@@ -49,7 +52,9 @@ export default function AddFilmForm() {
           </div>
 
           <div className="form-field">
-            <label className="form-label" htmlFor="film-genre">Žánr</label>
+            <label className="form-label" htmlFor="film-genre">
+              Žánr
+            </label>
             <input
               id="film-genre"
               className="input"
@@ -61,7 +66,9 @@ export default function AddFilmForm() {
           </div>
 
           <div className="form-field">
-            <label className="form-label" htmlFor="film-year">Rok vydání</label>
+            <label className="form-label" htmlFor="film-year">
+              Rok vydání
+            </label>
             <input
               id="film-year"
               className="input"
@@ -76,7 +83,9 @@ export default function AddFilmForm() {
           </div>
 
           <div className="form-field">
-            <label className="form-label" htmlFor="film-rating">Hodnocení</label>
+            <label className="form-label" htmlFor="film-rating">
+              Hodnocení
+            </label>
             <input
               id="film-rating"
               className="input"
